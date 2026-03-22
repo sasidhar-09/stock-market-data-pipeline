@@ -250,6 +250,6 @@ MIT - feel free to use this for learning
 ## Contact
 
 If you have questions or want to connect:
-- LinkedIn: [your-profile]
+- LinkedIn: www.linkedin.com/in/sasi09
 - Email: your.email@example.com
 - GitHub: sasidhar-09
