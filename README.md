@@ -21,7 +21,7 @@ The whole thing takes about 2-3 minutes and runs completely on its own.
 
 ## Architecture
 
-![Architecture](docs/Stock_Market_Pipeline_Architecture.pptx)
+![Architecture](docs/Stock_Market_Pipeline_Architecture.jpg)
 
 The pipeline follows the "medallion architecture" pattern:
  
