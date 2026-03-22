@@ -1,0 +1,18 @@
+# Core data processing
+numpy==1.26.4
+pandas==2.2.3
+
+# Stock data
+yfinance==0.2.51
+
+# Snowflake - newer version supports pandas 2.2.x
+snowflake-connector-python==3.12.3
+
+# dbt
+dbt-core==1.8.0
+dbt-snowflake==1.8.0
+
+# Utilities
+python-dotenv==1.0.1
+loguru==0.7.2
+pytz==2025.1

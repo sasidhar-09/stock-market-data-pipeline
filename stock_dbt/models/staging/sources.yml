@@ -1,0 +1,46 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Raw data from stock market API"
+    database: STOCK_MARKET
+    schema: RAW
+    tables:
+      - name: stock_prices_raw
+        description: "Raw stock price data from yfinance"
+        columns:
+          - name: symbol
+            description: "Stock ticker symbol (NSE)"
+            tests:
+              - not_null
+          
+          - name: date
+            description: "Trading date"
+            tests:
+              - not_null
+          
+          - name: open
+            description: "Opening price"
+          
+          - name: high
+            description: "Highest price of the day"
+          
+          - name: low
+            description: "Lowest price of the day"
+          
+          - name: close
+            description: "Closing price"
+            tests:
+              - not_null
+          
+          - name: volume
+            description: "Trading volume"
+          
+          - name: ingestion_timestamp
+            description: "When data was ingested"
+          
+          - name: source_system
+            description: "Source of the data (yfinance)"
+          
+          - name: pipeline_run_id
+            description: "Pipeline execution ID"

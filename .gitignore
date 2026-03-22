@@ -1,0 +1,56 @@
+# CRITICAL: Environment variables with passwords
+.env
+*.env
+!.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+venv/
+env/
+ENV/
+
+# Airflow
+airflow/logs/
+airflow/airflow.db
+airflow/airflow-webserver.pid
+airflow/standalone_admin_password.txt
+
+# dbt
+stock_dbt/target/
+stock_dbt/dbt_packages/
+stock_dbt/logs/
+stock_dbt/.user.yml
+
+# Data files (optional - uncomment if you don't want CSV files in repo)
+# data/raw/*.csv
+data/archive/
+notes
+tests
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker
+.docker/
+
+# Logs
+*.log
+logs/
+*.tmp
+*.bak

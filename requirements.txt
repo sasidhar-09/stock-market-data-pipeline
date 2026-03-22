@@ -1,0 +1,29 @@
+# ============================================================
+# Stock Market Data Pipeline — Requirements
+# Python 3.10+ recommended
+# Install using: pip install -r requirements.txt
+# ============================================================
+
+# ── Data Fetching ────────────────────────────────────────────
+yfinance==0.2.51                    # Fetch stock data from Yahoo Finance (NSE/BSE)
+
+# ── Data Processing ──────────────────────────────────────────
+pandas==2.2.3                       # Data manipulation and transformation
+numpy==2.2.2                        # Numerical operations
+
+# ── Database — Snowflake ─────────────────────────────────────
+snowflake-connector-python==3.5.0   # Connect Python to Snowflake
+snowflake-sqlalchemy==1.6.1         # SQLAlchemy dialect for Snowflake (compatible with 3.x)
+
+# ── Workflow Orchestration ───────────────────────────────────
+apache-airflow==2.9.0               # Pipeline orchestration and scheduling
+apache-airflow-providers-snowflake  # Airflow operators for Snowflake
+
+# ── Utilities ────────────────────────────────────────────────
+python-dotenv==1.0.1                # Load environment variables from .env file
+requests==2.32.3                    # HTTP requests library
+pytz==2025.1                        # Timezone support
+loguru==0.7.2                       # Clean and simple logging
+
+# ── Testing ──────────────────────────────────────────────────
+pytest==8.3.5                       # Testing framework

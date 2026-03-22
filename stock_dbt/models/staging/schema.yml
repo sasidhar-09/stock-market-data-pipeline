@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_stock_prices
+    description: "Cleaned and validated stock prices"
+    columns:
+      - name: symbol
+        description: "Stock ticker symbol"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['RELIANCE.NS', 'TCS.NS', 'HDFCBANK.NS', 'INFY.NS', 
+                       'ICICIBANK.NS', 'HINDUNILVR.NS', 'ITC.NS', 'SBIN.NS', 
+                       'BHARTIARTL.NS', 'KOTAKBANK.NS']
+      
+      - name: date
+        description: "Trading date"
+        tests:
+          - not_null
+      
+      - name: close_price
+        description: "Closing price in INR"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+      
+      - name: volume
+        description: "Trading volume"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+      
+      - name: daily_change_pct
+        description: "Daily percentage change"

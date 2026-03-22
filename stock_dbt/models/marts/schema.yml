@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: daily_returns
+    description: "Daily return calculations for each stock"
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      
+      - name: date
+        tests:
+          - not_null
+      
+      - name: daily_return_pct
+        description: "Daily return percentage"
+  
+  - name: moving_averages
+    description: "Moving averages and technical indicators"
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      
+      - name: ma_7_day
+        description: "7-day moving average"
+      
+      - name: ma_30_day
+        description: "30-day moving average"
+  
+  - name: volume_analysis
+    description: "Volume trends and anomaly detection"
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      
+      - name: volume
+        tests:
+          - not_null
