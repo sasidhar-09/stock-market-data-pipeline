@@ -1,201 +1,267 @@
-# 📈 Stock Market Data Pipeline
+# Stock Market Data Pipeline
 
-> An end-to-end data engineering pipeline that ingests real-time Indian stock market data,
-> transforms it through a Medallion Architecture, and serves analytics-ready data for reporting.
+An automated system that downloads Indian stock prices every day, stores them in a cloud database, and calculates useful metrics like moving averages and daily returns.
 
-![Status](https://img.shields.io/badge/Status-In%20Progress-yellow)
-![Python](https://img.shields.io/badge/Python-3.10+-blue)
-![Airflow](https://img.shields.io/badge/Apache%20Airflow-2.x-green)
-![dbt](https://img.shields.io/badge/dbt-1.x-orange)
-![Snowflake](https://img.shields.io/badge/Snowflake-Data%20Warehouse-lightblue)
+**Tech used:** Python, Apache Airflow, Snowflake, dbt, Docker
 
 ---
 
-## 🏗️ Architecture
+## What This Does
 
+Every weekday at 6 PM, this pipeline:
+1. Downloads stock prices for 10 Indian companies (Reliance, TCS, HDFC Bank, etc.)
+2. Saves the data to CSV files
+3. Loads it into Snowflake (a cloud database)
+4. Calculates metrics like daily returns, moving averages, and volume patterns
+5. Runs quality checks to make sure the data is good
+
+The whole thing takes about 2-3 minutes and runs completely on its own.
+
+---
+
+## Why I Built This
+
+I wanted to learn how real data pipelines work in companies. This project covers:
+- Scheduling jobs (Airflow)
+- Working with cloud databases (Snowflake)
+- Transforming data (dbt)
+- Running everything in containers (Docker)
+
+It's similar to what data engineers do at companies - pulling data from APIs, storing it, and making it ready for analysts or dashboards.
+
+---
+
+## Architecture
+
+![Architecture](Downloads/Stock_Market_Pipeline_Architecture.jpgx)
+
+The pipeline follows the "medallion architecture" pattern:
+ 
+**Bronze Layer** - Raw data exactly as it comes from the API  
+**Silver Layer** - Cleaned data with duplicates removed  
+**Gold Layer** - Ready-to-use metrics for analysis
+
+---
+
+## What It Calculates
+
+**Daily Returns**
+- How much each stock went up or down
+- Categories: Large Gain, Moderate Gain, Flat, Moderate Loss, Large Loss
+
+**Moving Averages**
+- 7-day and 30-day averages
+- Golden Cross signals (when short-term average crosses above long-term = bullish)
+- Death Cross signals (opposite = bearish)
+
+**Volume Analysis**
+- Is today's volume higher or lower than usual?
+- Which stocks are seeing unusual activity?
+
+---
+
+## How to Run It
+
+### What You Need
+- Docker Desktop installed
+- A Snowflake account (free trial is fine)
+
+### Quick Start
+
+**1. Get the code**
+```bash
+git clone https://github.com/YOUR_USERNAME/stock-market-data-pipeline.git
+cd stock-market-data-pipeline
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────────┐
-│   Data Source   │────▶│  Orchestration   │────▶│   Data Warehouse    │
-│                 │     │                  │     │                     │
-│  yfinance API   │     │ Apache Airflow   │     │     Snowflake        │
-│ (NSE/BSE Data)  │     │   (DAG Runs      │     │  ┌───────────────┐  │
-│                 │     │    Daily)        │     │  │  RAW Layer    │  │
-└─────────────────┘     └──────────────────┘     │  ├───────────────┤  │
-                                                  │  │STAGING Layer  │  │
-┌─────────────────┐     ┌──────────────────┐     │  ├───────────────┤  │
-│  Visualization  │◀────│  Transformation  │◀────│  │  MARTS Layer  │  │
-│                 │     │                  │     │  └───────────────┘  │
-│    Power BI     │     │      dbt         │     └─────────────────────┘
-│   Dashboard     │     │  (SQL Models)    │
-└─────────────────┘     └──────────────────┘
+
+**2. Set up your database**
+
+Go to Snowflake and run this:
+```sql
+CREATE DATABASE STOCK_MARKET;
+CREATE SCHEMA STOCK_MARKET.RAW;
+CREATE SCHEMA STOCK_MARKET.STAGING;
+CREATE SCHEMA STOCK_MARKET.MARTS;
+
+CREATE TABLE STOCK_MARKET.RAW.STOCK_PRICES_RAW (
+    symbol VARCHAR(50),
+    date DATE,
+    open DECIMAL(18,2),
+    high DECIMAL(18,2),
+    low DECIMAL(18,2),
+    close DECIMAL(18,2),
+    volume BIGINT,
+    ingestion_timestamp TIMESTAMP,
+    source_system VARCHAR(100),
+    pipeline_run_id VARCHAR(100)
+);
 ```
 
-**Data Flow:**
-`yfinance API` → `Python Ingestion Script` → `Airflow DAG` → `Snowflake RAW` → `dbt Transformations` → `Snowflake MARTS` → `Power BI`
+**3. Add your credentials**
+```bash
+cp .env.example .env
+# Edit .env and add your Snowflake username/password
+```
+
+**4. Start it**
+```bash
+cd airflow
+docker-compose build    # Takes 5-10 minutes first time
+docker-compose up -d    # Starts everything
+```
+
+**5. Open the dashboard**
+
+Go to http://localhost:8080
+
+Login with username `airflow` and password `airflow`
+
+Click on the `stock_market_etl_pipeline` and turn it on.
 
 ---
 
-## 🎯 Project Objective
-
-**Business Problem:** Stock market analysts spend hours manually downloading, cleaning, and preparing data for reporting. This pipeline automates the entire process — from raw data ingestion to analytics-ready output.
-
-**Solution:**
-- Automated daily ingestion of Indian stock data (NIFTY 50 stocks)
-- Medallion Architecture ensuring data quality at every layer
-- Analytics-ready tables for instant Power BI reporting
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Tool | Purpose |
-|---|---|---|
-| Ingestion | Python + yfinance | Fetch daily stock data from NSE/BSE |
-| Orchestration | Apache Airflow | Schedule and monitor pipeline DAGs |
-| Storage | Snowflake | Cloud data warehouse |
-| Transformation | dbt | SQL-based data modeling |
-| Visualization | Power BI | Business intelligence dashboard |
-| Version Control | Git + GitHub | Code management |
-
----
-
-## 📁 Project Structure
-
+## Project Structure
 ```
 stock-market-data-pipeline/
-│
-├── dags/                          # Airflow DAG definitions
-│   └── stock_pipeline_dag.py      # Main pipeline DAG
-│
-├── src/
-│   ├── ingestion/
-│   │   └── fetch_stock_data.py    # yfinance data extraction
-│   ├── utils/
-│   │   └── helpers.py             # Reusable utility functions
-│   └── config/
-│       └── stocks.py              # Stock symbols config (NIFTY 50)
-│
-├── dbt/
-│   ├── models/
-│   │   ├── staging/               # STAGING layer — cleaned data
-│   │   │   └── stg_stock_prices.sql
-│   │   └── marts/                 # MARTS layer — business logic
-│   │       ├── daily_returns.sql
-│   │       ├── moving_averages.sql
-│   │       └── volume_trends.sql
-│   └── dbt_project.yml
-│
-├── tests/                         # Unit tests
-│   └── test_fetch_data.py
-│
-├── requirements.txt               # Python dependencies
-├── docker-compose.yml             # Airflow local setup
-└── README.md
+├── airflow/              # Orchestration
+│   ├── dags/            # The pipeline code
+│   └── Dockerfile       # Custom setup
+├── src/                 # Data fetching logic
+│   ├── ingestion/       # Gets data from Yahoo Finance
+│   └── utils/           # Helper functions
+├── stock_dbt/           # Data transformations
+│   └── models/          # SQL that creates metrics
+└── data/
+    └── raw/             # CSV files saved here
 ```
 
 ---
 
-## 📊 Medallion Architecture
+## Example Queries
 
-| Layer | Location | Description |
-|---|---|---|
-| **Bronze (RAW)** | `STOCK_DB.RAW` | Raw data as-is from yfinance API — no transformations |
-| **Silver (STAGING)** | `STOCK_DB.STAGING` | Cleaned, typed, renamed — null checks applied |
-| **Gold (MARTS)** | `STOCK_DB.MARTS` | Aggregated, business-ready — daily returns, moving averages |
+Once data is loaded, you can run these in Snowflake:
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-```bash
-Python 3.10+
-Docker Desktop
-Snowflake account (free trial: signup.snowflake.com)
+**See recent gainers**
+```sql
+SELECT symbol, date, daily_return_pct
+FROM MARTS.DAILY_RETURNS
+WHERE date >= CURRENT_DATE - 7
+ORDER BY daily_return_pct DESC
+LIMIT 10;
 ```
 
-### Installation
-```bash
-# Clone the repository
-git clone https://github.com/sasidhar-09/stock-market-data-pipeline.git
-cd stock-market-data-pipeline
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Start Airflow locally
-docker-compose up -d
-```
-
-### Configuration
-```bash
-# Set environment variables
-export SNOWFLAKE_ACCOUNT=your_account
-export SNOWFLAKE_USER=your_user
-export SNOWFLAKE_PASSWORD=your_password
+**Find golden cross signals**
+```sql
+SELECT symbol, date, close, ma_signal
+FROM MARTS.MOVING_AVERAGES
+WHERE ma_signal = 'Golden Cross'
+  AND date >= CURRENT_DATE - 30;
 ```
 
 ---
 
-## 📈 Sample Data
+## Things I Learned
 
+**Technical stuff:**
+- How to use Airflow to schedule jobs
+- Bulk loading data into Snowflake with COPY INTO
+- Writing SQL transformations with dbt
+- Managing dependencies with Docker
+
+**Problems I solved:**
+- NumPy version conflicts (some packages don't work with NumPy 2.x)
+- Parsing Snowflake's response format (row count isn't where you'd expect)
+- File corruption during writes (fixed with atomic writes)
+- Docker volume mounts and Python module caching
+
+---
+
+## Customization
+
+**Change which stocks to track**
+
+Edit `src/config/stocks.py`:
 ```python
-# Stocks tracked — NIFTY 50 Top 10
-STOCKS = [
-    "RELIANCE.NS",   # Reliance Industries
-    "TCS.NS",        # Tata Consultancy Services
-    "HDFCBANK.NS",   # HDFC Bank
-    "INFY.NS",       # Infosys
-    "ICICIBANK.NS",  # ICICI Bank
-    "HINDUNILVR.NS", # Hindustan Unilever
-    "ITC.NS",        # ITC Limited
-    "SBIN.NS",       # State Bank of India
-    "BHARTIARTL.NS", # Bharti Airtel
-    "KOTAKBANK.NS",  # Kotak Mahindra Bank
+INDIAN_STOCKS = [
+    'RELIANCE.NS',
+    'TCS.NS',
+    # Add more here
 ]
 ```
 
----
+**Use real data instead of mock**
 
-## 🗺️ Roadmap
-
-- [x] Project setup + repository structure
-- [ ] Python ingestion script (yfinance)
-- [ ] Airflow DAG — daily stock data fetch
-- [ ] Snowflake setup — RAW schema + tables
-- [ ] dbt STAGING models — data cleaning
-- [ ] dbt MARTS models — business aggregations
-- [ ] Power BI dashboard
-- [ ] Unit tests
-- [ ] CI/CD pipeline with GitHub Actions
+By default it uses fake data for testing. To use real Yahoo Finance data:
+```yaml
+# In airflow/docker-compose.yml
+USE_MOCK_DATA: "False"
+```
 
 ---
 
-## 🧠 Key Learnings
+## Troubleshooting
 
-This project demonstrates:
-- End-to-end data pipeline development
-- Medallion Architecture implementation (Bronze/Silver/Gold)
-- Workflow orchestration with Apache Airflow
-- Cloud data warehousing with Snowflake
-- SQL-based transformations with dbt
-- Data modeling best practices
+**Port 8080 already in use?**
+- Something else is using that port
+- Either stop that program or change the port in docker-compose.yml
 
----
+**Snowflake connection fails?**
+- Double-check your credentials in .env
+- Make sure you created the database and table
 
-## 👤 Author
-
-**Sasidhar Reddy**
-- LinkedIn: [linkedin.com/in/Sasi09](https://linkedin.com/in/Sasi09)
-- GitHub: [github.com/sasidhar-09](https://github.com/sasidhar-09)
-- Email: sasidhar150rvr@gmail.com
+**Pipeline runs but no data?**
+- Check the Airflow logs for errors
+- Try running with `USE_MOCK_DATA: "True"` first to test
 
 ---
 
-## 📝 License
+## What's Next
 
-This project is open source and available under the [MIT License](LICENSE).
+Things I might add:
+- Real-time data updates (instead of once per day)
+- Email alerts when stocks hit certain conditions
+- A Power BI dashboard
+- Machine learning to predict price movements
 
 ---
 
-> ⭐ If you found this project useful, please consider starring the repository!
+## Files You Shouldn't Commit
+
+Make sure these are in your `.gitignore`:
+- `.env` (has your passwords!)
+- `__pycache__/` (Python cache files)
+- `logs/` (Airflow logs)
+- `data/raw/*.csv` (unless you want to keep examples)
+
+---
+
+## Tech Stack Details
+
+| What | Technology | Why |
+|------|-----------|-----|
+| Scheduling | Apache Airflow 2.9.0 | Industry standard for data pipelines |
+| Database | Snowflake | Cloud data warehouse, separates storage and compute |
+| Transformations | dbt 1.8.0 | Version control for SQL, built-in testing |
+| Containers | Docker | Same environment everywhere, easy setup |
+| Language | Python 3.12 | Good libraries for data work |
+
+**Key packages:**
+- pandas 2.2.3 - data manipulation
+- numpy 1.26.4 - numerical operations (pinned to 1.x for compatibility)
+- snowflake-connector-python 3.12.3 - talks to Snowflake
+- yfinance - gets stock data
+
+---
+
+## License
+
+MIT - feel free to use this for learning
+
+---
+
+## Contact
+
+If you have questions or want to connect:
+- LinkedIn: [your-profile]
+- Email: your.email@example.com
+- GitHub: [@your-username]
