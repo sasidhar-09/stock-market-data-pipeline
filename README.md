@@ -251,5 +251,5 @@ MIT - feel free to use this for learning
 
 If you have questions or want to connect:
 - LinkedIn: www.linkedin.com/in/sasi09
-- Email: your.email@example.com
-- GitHub: sasidhar-09
+- Email: sasidhar.h2o@gmail.com
+- GitHub: https://github.com/sasidhar-09
