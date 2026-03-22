@@ -19,18 +19,6 @@ The whole thing takes about 2-3 minutes and runs completely on its own.
 
 ---
 
-## Why I Built This
-
-I wanted to learn how real data pipelines work in companies. This project covers:
-- Scheduling jobs (Airflow)
-- Working with cloud databases (Snowflake)
-- Transforming data (dbt)
-- Running everything in containers (Docker)
-
-It's similar to what data engineers do at companies - pulling data from APIs, storing it, and making it ready for analysts or dashboards.
-
----
-
 ## Architecture
 
 ![Architecture](Downloads/Stock_Market_Pipeline_Architecture.jpgx)
