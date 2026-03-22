@@ -33,6 +33,7 @@ stock_dbt/.user.yml
 data/archive/
 notes
 tests
+/requirements.txt
 
 # IDE
 .vscode/
