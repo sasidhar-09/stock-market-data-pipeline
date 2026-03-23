@@ -102,7 +102,7 @@ docker-compose up -d    # Starts everything
 
 Go to http://localhost:8080
 
-Login with username `airflow` and password `airflow`
+Login with username `admin` and password `admin`
 
 Click on the `stock_market_etl_pipeline` and turn it on.
 

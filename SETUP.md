@@ -219,8 +219,8 @@ Should show 3 containers running:
 1. Open your browser
 2. Go to http://localhost:8080
 3. Login:
-   - Username: `airflow`
-   - Password: `airflow`
+   - Username: `admin`
+   - Password: `admin`
 
 ### B. Enable the DAG
 
