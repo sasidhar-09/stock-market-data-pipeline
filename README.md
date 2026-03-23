@@ -109,19 +109,7 @@ Click on the `stock_market_etl_pipeline` and turn it on.
 ---
 
 ## Project Structure
-```
-stock-market-data-pipeline/
-├── airflow/              # Orchestration
-│   ├── dags/            # The pipeline code
-│   └── Dockerfile       # Custom setup
-├── src/                 # Data fetching logic
-│   ├── ingestion/       # Gets data from Yahoo Finance
-│   └── utils/           # Helper functions
-├── stock_dbt/           # Data transformations
-│   └── models/          # SQL that creates metrics
-└── data/
-    └── raw/             # CSV files saved here
-```
+![ProjectStructure](docs/ProjectStructure.jpg)
 
 ---
 
